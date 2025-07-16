@@ -1,6 +1,24 @@
 public with sharing class CredentialManagerController {
     
     @AuraEnabled
+    public static String getCurrentEndpoint(String namedCredentialName) {
+        try {
+            return ExternalCredentialService.getCurrentEndpoint(namedCredentialName);
+        } catch(Exception e) {
+            throw new AuraHandledException(e.getMessage());
+        }
+    }
+
+    @AuraEnabled
+    public static void updateNamedCredentialEndpoint(String namedCredentialName, String newEndpointUrl) {
+        try {
+            ExternalCredentialService.updateNamedCredentialEndpoint(namedCredentialName, newEndpointUrl);
+        } catch(Exception e) {
+            throw new AuraHandledException(e.getMessage());
+        }
+    }
+    
+    @AuraEnabled
     public static void saveCredentialValues(String externalCredentialName, String principalName, Map<String, String> credentialValues) {
         try {
             // 1. Save/Update the credential values

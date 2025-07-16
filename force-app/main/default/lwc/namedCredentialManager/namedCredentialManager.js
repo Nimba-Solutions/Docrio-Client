@@ -1,8 +1,8 @@
 import { LightningElement } from "lwc";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import { NAMED_CREDENTIALS } from "./keys";
-import getOrgInfo from "@salesforce/apex/DocrioClient.getOrgInfo";
-import updateNamedCredentialEndpoint from "@salesforce/apex/ExternalCredentialService.updateNamedCredentialEndpoint";
+import getCurrentEndpoint from "@salesforce/apex/CredentialManagerController.getCurrentEndpoint";
+import updateNamedCredentialEndpoint from "@salesforce/apex/CredentialManagerController.updateNamedCredentialEndpoint";
 
 export default class NamedCredentialManager extends LightningElement {
   credentials = NAMED_CREDENTIALS.credentials;
@@ -12,22 +12,13 @@ export default class NamedCredentialManager extends LightningElement {
 
   async connectedCallback() {
     try {
-      // Get the org info which contains the URL
-      const orgInfo = await getOrgInfo();
-      const newUrl = orgInfo.url;
-
-      if (!newUrl) {
-        throw new Error("No URL returned from org info");
+      // Get current endpoints for each credential
+      for (const cred of this.credentials) {
+        const currentUrl = await getCurrentEndpoint({
+          namedCredentialName: cred.name,
+        });
+        this.endpointUrls[cred.name] = currentUrl;
       }
-
-      // Initialize the URLs map
-      this.credentials.forEach((cred) => {
-        this.endpointUrls[cred.name] = {
-          currentUrl: "", // Will be populated when we implement getCurrentUrl
-          newUrl: newUrl,
-        };
-      });
-
       this.loading = false;
     } catch (error) {
       this.error = error.message;
@@ -42,18 +33,24 @@ export default class NamedCredentialManager extends LightningElement {
     }
   }
 
+  handleUrlChange(event) {
+    const credName = event.target.dataset.credential;
+    const newUrl = event.target.value;
+    this.endpointUrls[credName] = newUrl;
+  }
+
   async handleUpdate(event) {
     const credName = event.target.dataset.credential;
-    const urlInfo = this.endpointUrls[credName];
+    const newUrl = this.endpointUrls[credName];
 
-    if (!urlInfo || !urlInfo.newUrl) {
+    if (!newUrl) {
       return;
     }
 
     try {
       await updateNamedCredentialEndpoint({
         namedCredentialName: credName,
-        newEndpointUrl: urlInfo.newUrl,
+        newEndpointUrl: newUrl,
       });
 
       this.dispatchEvent(
@@ -63,9 +60,6 @@ export default class NamedCredentialManager extends LightningElement {
           variant: "success",
         })
       );
-
-      // Update the current URL in our state
-      this.endpointUrls[credName].currentUrl = urlInfo.newUrl;
     } catch (error) {
       this.dispatchEvent(
         new ShowToastEvent({
@@ -84,8 +78,7 @@ export default class NamedCredentialManager extends LightningElement {
   get credentialList() {
     return this.credentials.map((cred) => ({
       ...cred,
-      currentUrl: this.endpointUrls[cred.name]?.currentUrl || "",
-      newUrl: this.endpointUrls[cred.name]?.newUrl || "",
+      currentUrl: this.endpointUrls[cred.name] || "",
     }));
   }
 }

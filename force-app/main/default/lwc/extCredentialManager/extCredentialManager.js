@@ -1,7 +1,6 @@
 import { LightningElement } from "lwc";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import saveCredentialValues from "@salesforce/apex/CredentialManagerController.saveCredentialValues";
-import updateCredentialValues from "@salesforce/apex/CredentialManagerController.updateCredentialValues";
 import { CREDENTIAL_KEYS } from "./keys";
 
 export default class ExtCredentialManager extends LightningElement {
@@ -71,30 +70,8 @@ export default class ExtCredentialManager extends LightningElement {
     }
   }
 
-  async handleUpdate(event) {
-    event.preventDefault();
-    try {
-      await updateCredentialValues({
-        externalCredentialName: this.externalCredentialName,
-        principalName: this.principalName,
-        credentialValues: this.credentialValues,
-      });
-
-      this.dispatchEvent(
-        new ShowToastEvent({
-          title: "Success",
-          message: "Credentials updated successfully",
-          variant: "success",
-        })
-      );
-    } catch (error) {
-      this.dispatchEvent(
-        new ShowToastEvent({
-          title: "Error updating credentials",
-          message: error.body?.message || "Unknown error occurred",
-          variant: "error",
-        })
-      );
-    }
-  }
+  // Replace handleUpdate with handleSubmit since we're using the same method
+  handleUpdate = function (event) {
+    return this.handleSubmit(event);
+  };
 }

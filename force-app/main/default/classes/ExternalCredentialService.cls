@@ -1,4 +1,4 @@
-public class ExternalCredentialService {
+public with sharing class ExternalCredentialService {
 
     public static ConnectApi.ExternalCredential getExternalCredential(String developerName) {
         ConnectApi.ExternalCredential fetchedEC = ConnectApi.NamedCredentials.getExternalCredential(developerName);
@@ -107,6 +107,11 @@ public class ExternalCredentialService {
             System.debug(LoggingLevel.ERROR, 'Error updating Named Credential endpoint: ' + e.getMessage());
             throw new ExternalCredentialException('Failed to update Named Credential endpoint: ' + e.getMessage());
         }
+    }
+    
+    public static String getCurrentEndpoint(String namedCredentialName) {
+        ConnectApi.NamedCredential namedCred = ConnectApi.NamedCredentials.getNamedCredential(namedCredentialName);
+        return namedCred.calloutUrl;
     }
     
     public class ExternalCredentialException extends Exception {}
