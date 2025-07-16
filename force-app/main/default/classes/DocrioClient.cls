@@ -46,7 +46,7 @@ public with sharing class DocrioClient {
             
             // Set required headers for all Docrio API calls
             request.setHeader('Authorization', 'Bearer ' + salesforceToken);
-            request.setHeader('X-API-KEY', '{!$Credential.DocrioApiCredentials.key}');
+            request.setHeader('X-API-KEY', '{!$Credential.DocrioCredentials.api_key}');
             request.setHeader('Accept', '*/*');
             request.setHeader('Cache-Control', 'no-cache');
             
@@ -126,10 +126,10 @@ public with sharing class DocrioClient {
             
             // Build the request body with OAuth parameters using the correct principal
             String body = 'grant_type=password' +
-                         '&client_id={!$Credential.DocrioClientCredentials.client_id}' +
-                         '&client_secret={!$Credential.DocrioClientCredentials.client_secret}' +
-                         '&username={!$Credential.DocrioClientCredentials.username}' +
-                         '&password={!$Credential.DocrioClientCredentials.password}';
+                         '&client_id={!$Credential.DocrioCredentials.client_id}' +
+                         '&client_secret={!$Credential.DocrioCredentials.client_secret}' +
+                         '&username={!$Credential.DocrioCredentials.username}' +
+                         '&password={!$Credential.DocrioCredentials.password}';
             
             request.setBody(body);
             

@@ -3,18 +3,13 @@ public with sharing class CredentialManagerController {
     @AuraEnabled
     public static void saveCredentialValues(String externalCredentialName, String principalName, Map<String, String> credentialValues) {
         try {
-            ExternalCredentialService.createCredentialValues(externalCredentialName, principalName, credentialValues);
+            // 1. Save/Update the credential values
+            ExternalCredentialService.upsertCredentialValues(externalCredentialName, principalName, credentialValues);
+          
+            // obtaining the new URL from the org info should be done when the LWC is loaded
+            // we should display the URL value in the LWC
         } catch(Exception e) {
-            throw new AuraHandledException('Failed to save credentials: ' + e.getMessage());
-        }
-    }
-
-    @AuraEnabled
-    public static void updateCredentialValues(String externalCredentialName, String principalName, Map<String, String> credentialValues) {
-        try {
-            ExternalCredentialService.updateCredentialValues(externalCredentialName, principalName, credentialValues);
-        } catch(Exception e) {
-            throw new AuraHandledException('Failed to update credentials: ' + e.getMessage());
+            throw new AuraHandledException(e.getMessage());
         }
     }
 } 

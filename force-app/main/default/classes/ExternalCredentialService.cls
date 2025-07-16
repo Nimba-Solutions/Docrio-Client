@@ -40,6 +40,22 @@ public class ExternalCredentialService {
         ConnectApi.NamedCredentials.updateCredential(credValues);
     }
     
+    /**
+     * Attempts to update credential values, falls back to create if update fails
+     * @param externalCredentialName The name of the external credential
+     * @param principalName The principal name
+     * @param credentialValues Map of credential values to upsert
+     */
+    public static void upsertCredentialValues(String externalCredentialName, String principalName, Map<String, String> credentialValues) {
+        try {
+            // Try to update first
+            updateCredentialValues(externalCredentialName, principalName, credentialValues);
+        } catch (ConnectApi.ConnectApiException e) {
+            // If update fails for any reason, try to create
+            createCredentialValues(externalCredentialName, principalName, credentialValues);
+        }
+    }
+    
     private static ConnectApi.CredentialInput buildCredentialInput(String externalCredentialName, String principalName, Map<String, String> credentialValues) {
         ConnectApi.CredentialInput credValues = new ConnectApi.CredentialInput();
         credValues.authenticationProtocol = ConnectApi.CredentialAuthenticationProtocol.Custom;
@@ -62,4 +78,38 @@ public class ExternalCredentialService {
         return credentialValue;
     }
     
+    /**
+     * Updates the endpoint URL of a Named Credential if different from current
+     * @param namedCredentialName The developer name of the Named Credential to update
+     * @param newEndpointUrl The new endpoint URL to set
+     */
+    public static void updateNamedCredentialEndpoint(String namedCredentialName, String newEndpointUrl) {
+        try {
+            // Get the existing Named Credential
+            ConnectApi.NamedCredential namedCred = ConnectApi.NamedCredentials.getNamedCredential(namedCredentialName);
+            
+            // Only update if the URL is different
+            if (namedCred.endpoint != newEndpointUrl) {
+                // Create input for update
+                ConnectApi.NamedCredentialInput input = new ConnectApi.NamedCredentialInput();
+                input.id = namedCred.id;
+                input.developerName = namedCred.developerName;
+                input.masterLabel = namedCred.masterLabel;
+                input.endpoint = newEndpointUrl;
+                input.principalType = namedCred.principalType;
+                input.protocol = namedCred.protocol;
+                
+                // Update the Named Credential
+                ConnectApi.NamedCredentials.updateNamedCredential(input);
+                System.debug('Named Credential endpoint updated to: ' + newEndpointUrl);
+            } else {
+                System.debug('Named Credential endpoint already set to: ' + newEndpointUrl);
+            }
+        } catch (Exception e) {
+            System.debug(LoggingLevel.ERROR, 'Error updating Named Credential endpoint: ' + e.getMessage());
+            throw new ExternalCredentialException('Failed to update Named Credential endpoint: ' + e.getMessage());
+        }
+    }
+    
+    public class ExternalCredentialException extends Exception {}
 }

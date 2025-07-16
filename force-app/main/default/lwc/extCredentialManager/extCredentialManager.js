@@ -1,44 +1,57 @@
-import { LightningElement, api } from "lwc";
+import { LightningElement } from "lwc";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import saveCredentialValues from "@salesforce/apex/CredentialManagerController.saveCredentialValues";
 import updateCredentialValues from "@salesforce/apex/CredentialManagerController.updateCredentialValues";
 import { CREDENTIAL_KEYS } from "./keys";
 
-export default class CredentialManager extends LightningElement {
-  @api externalCredentialName = "DocrioApiCredentials";
-  @api principalName = "DocrioUser";
-
+export default class ExtCredentialManager extends LightningElement {
   credentialValues = {};
-  _fields = CREDENTIAL_KEYS.keys;
 
   connectedCallback() {
-    // Initialize credentialValues with empty strings for each key
-    this._fields.forEach((field) => {
-      this.credentialValues[field.name] = "";
+    // Initialize credentialValues with empty strings for each credential's keys
+    Object.values(CREDENTIAL_KEYS).forEach((cred) => {
+      cred.keys.forEach((field) => {
+        if (!this.credentialValues[cred.name]) {
+          this.credentialValues[cred.name] = {};
+        }
+        this.credentialValues[cred.name][field.name] = "";
+      });
     });
   }
 
-  get fields() {
-    return this._fields.map((field) => ({
-      ...field,
-      value: this.credentialValues[field.name] || "",
+  get externalCredentials() {
+    return Object.values(CREDENTIAL_KEYS).map((cred) => ({
+      ...cred,
+      keys: cred.keys.map((field) => ({
+        ...field,
+        value: this.credentialValues[cred.name]?.[field.name] || "",
+      })),
     }));
   }
 
   handleInputChange(event) {
     const field = event.target.name;
     const value = event.target.value;
-    this.credentialValues[field] = value;
+    const credName =
+      event.target.closest("[data-credential]").dataset.credential;
+
+    if (!this.credentialValues[credName]) {
+      this.credentialValues[credName] = {};
+    }
+    this.credentialValues[credName][field] = value;
   }
 
   async handleSubmit(event) {
     event.preventDefault();
     try {
-      await saveCredentialValues({
-        externalCredentialName: this.externalCredentialName,
-        principalName: this.principalName,
-        credentialValues: this.credentialValues,
-      });
+      // Save credentials for each External Credential
+      for (const credName in this.credentialValues) {
+        await saveCredentialValues({
+          externalCredentialName: credName,
+          principalName: CREDENTIAL_KEYS[credName].principal,
+          credentialValues: this.credentialValues[credName],
+        });
+      }
 
       this.dispatchEvent(
         new ShowToastEvent({
