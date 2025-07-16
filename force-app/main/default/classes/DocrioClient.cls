@@ -240,6 +240,32 @@ public with sharing class DocrioClient {
         }
     }
     
+    /**
+     * Gets organization information via direct API call
+     * @return Map<String, Object> The organization information
+     */
+    public Map<String, Object> getOrgInfo() {
+        try {
+            String salesforceToken = this.getSalesforceToken();
+            
+            Http http = new Http();
+            HttpRequest request = new HttpRequest();
+            request.setEndpoint('https://2xm5rfl2q0.execute-api.us-east-2.amazonaws.com/v1/orginfo');
+            request.setMethod('GET');
+            request.setHeader('Authorization', 'Bearer ' + salesforceToken);
+            
+            HttpResponse response = http.send(request);
+            
+            if (response.getStatusCode() == 200) {
+                return (Map<String, Object>) JSON.deserializeUntyped(response.getBody());
+            } else {
+                throw new DocrioException('Failed to get org info. Status: ' + response.getStatusCode() + ', Body: ' + response.getBody());
+            }
+        } catch (Exception e) {
+            throw new DocrioException('Error getting org info: ' + e.getMessage());
+        }
+    }
+    
     // Custom exception class
     public class DocrioException extends Exception {}
 }
