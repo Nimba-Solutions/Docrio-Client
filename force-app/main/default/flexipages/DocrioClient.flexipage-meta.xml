@@ -3,16 +3,8 @@
     <flexiPageRegions>
         <itemInstances>
             <componentInstance>
-                <componentInstanceProperties>
-                    <name>externalCredentialName</name>
-                    <value>DocrioCredentials</value>
-                </componentInstanceProperties>
-                <componentInstanceProperties>
-                    <name>principalName</name>
-                    <value>CLIENT</value>
-                </componentInstanceProperties>
-                <componentName>credentialManager</componentName>
-                <identifier>c_credentialManager</identifier>
+                <componentName>extCredentialManager</componentName>
+                <identifier>c_extCredentialManager</identifier>
             </componentInstance>
         </itemInstances>
         <name>Facet-94985a78-94df-4608-bfc3-5c91b606d20c</name>
@@ -54,7 +46,7 @@
         <name>main</name>
         <type>Region</type>
     </flexiPageRegions>
-    <masterLabel>SweetPics</masterLabel>
+    <masterLabel>Docrio Client</masterLabel>
     <template>
         <name>flexipage:defaultAppHomeTemplate</name>
     </template>

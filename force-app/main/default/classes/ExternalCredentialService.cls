@@ -89,18 +89,16 @@ public class ExternalCredentialService {
             ConnectApi.NamedCredential namedCred = ConnectApi.NamedCredentials.getNamedCredential(namedCredentialName);
             
             // Only update if the URL is different
-            if (namedCred.endpoint != newEndpointUrl) {
+            if (namedCred.calloutUrl != newEndpointUrl) {
                 // Create input for update
                 ConnectApi.NamedCredentialInput input = new ConnectApi.NamedCredentialInput();
-                input.id = namedCred.id;
                 input.developerName = namedCred.developerName;
                 input.masterLabel = namedCred.masterLabel;
-                input.endpoint = newEndpointUrl;
-                input.principalType = namedCred.principalType;
-                input.protocol = namedCred.protocol;
+                input.calloutUrl = newEndpointUrl;
+                input.type = namedCred.type;
                 
                 // Update the Named Credential
-                ConnectApi.NamedCredentials.updateNamedCredential(input);
+                ConnectApi.NamedCredentials.createNamedCredential(input);
                 System.debug('Named Credential endpoint updated to: ' + newEndpointUrl);
             } else {
                 System.debug('Named Credential endpoint already set to: ' + newEndpointUrl);
