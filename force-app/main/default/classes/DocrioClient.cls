@@ -34,7 +34,7 @@ public with sharing class DocrioClient {
      * @param contentType Content-Type header (optional)
      * @return Map<String, Object> Parsed JSON response
      */
-    private Map<String, Object> doCallout(String method, String endpoint, String body, String contentType) {
+    public Map<String, Object> doCallout(String method, String endpoint, String body, String contentType) {
         try {
             // Get Salesforce access token
             String salesforceToken = this.getSalesforceToken();
