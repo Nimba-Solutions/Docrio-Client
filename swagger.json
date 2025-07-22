@@ -1,5 +1,5 @@
 {
-    "openapi": "3.0.3",
+    "openapi": "3.0.0",
     "info": {
         "description": "The Docrio API can be used to build integrations with your organization's dedicated Docrio account.\n\n# **Prerequisites**\n\n- You must have installed the Docrio package in your Salesforce organization and completed the setup process.\n- You must [obtain a Salesforce access token for your Salesforce organization\r\n            ](https: //help.salesforce.com/s/articleView?id=xcloud.remoteaccess_oauth_flows.htm&type=5). Include the access token in the Authorization header of your requests with the value `Bearer <access_token>` where `<access_token>` is the value of the access token.\n- You must [obtain a Docrio API Key](https://litify-central.my.site.com/community/s/api-key-request). Include the API key in the `X-API-KEY` header of your requests with the value of the key.\n- You must use your organization's dedicated Docrio API URL when making requests to Docrio. You can [find your organization's dedicated Docrio API URL using the Docrio Setup API documentation](./setup).\n\n# **Authentication**\nWhen making calls to the Docrio API, you must include both a valid access token and a valid API key. For example:\n```\ncurl -i -X GET 'https://api.000000000000.genesisapi.com/v1/files?Ids=a1E1U000001juz6UAA' \\\n-H 'Authorization: Bearer $SALESFORCE_ACCESS_TOKEN' \\\n-H 'X-API-KEY: $DOCRIO_API_KEY'\n```\n<br />\nIf this succeeds, you will get a 200 OK response:\n```\nHTTP/2 200\ncontent-type: application/json\ncontent-length: 14\ndate: Thu, 22 May 2025 20:35:03 GMT\n...\n\n{\"Records\":[]}\n```\n<br />\nIf you do not include the access token, you will get a 401 Unauthorized error:\n```\nHTTP/2 401\ncontent-type: application/json\ncontent-length: 26\ndate: Thu, 22 May 2025 19:18:35 GMT\n...\n\n{\"message\":\"Unauthorized\"}\n```\n<br />\nIf your access key or API key is invalid, you will get a 403 Forbidden error:\n```\nHTTP/2 403\ncontent-type: application/json\ncontent-length: 82\ndate: Thu, 22 May 2025 19:23:40 GMT\n...\n{\"message\":\"User is not authorized to access this resource with an explicit deny\"}\n```\n<br />\nYou should test with both **valid** and **invalid** API keys to confirm your implementation is correct:\n- A call with a valid access token and a **valid** API key should return a 200 OK response.\n- A call with a valid access token and an **invalid** API key should return a 403 Forbidden error.\n\nIf you get back a different response for either of these cases, you need to fix your implementation.\n",
         "version": "v1",
@@ -96,27 +96,13 @@
                         }
                     },
                     "400": {
-                        "description": "Request body parameters are invalid",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/responses/BadRequest"
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/BadRequest"
                     },
                     "413": {
                         "description": "Request entity too large"
                     },
                     "500": {
-                        "description": "Error occurred while processing",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#components/schemas/ErrorMessageResponseWithFailReason"
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/ServerError"
                     }
                 }
             }
@@ -151,27 +137,13 @@
                         }
                     },
                     "400": {
-                        "description": "Request body parameters are invalid",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/responses/BadRequest"
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/BadRequest"
                     },
                     "413": {
                         "description": "Request entity too large"
                     },
                     "500": {
-                        "description": "Error occurred while processing",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#components/schemas/ErrorMessageResponseWithFailReason"
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/ServerError"
                     }
                 }
             }
@@ -429,38 +401,40 @@
             }
         },
         "/files/ta": {
-            "tags": [
-                "File Management"
-            ],
-            "summary": "Creates multiple or single salesforce file record ids and return signed urls.",
-            "description": "Providing single or multiple file names, a salesforce file record id and signed url will be created for each file name provided using transfer accelerator.\nThe response will be the original file name provided in the request mapped to an object containing that files signed url information and salesforce file record id.\nThe signed url is valid for 5 minutes and can be used to upload the file.\n",
-            "requestBody": {
-                "required": true,
-                "content": {
-                    "application/json": {
-                        "schema": {
-                            "$ref": "#/components/schemas/FilesTAPostRequest"
-                        }
-                    }
-                },
-                "description": "JSON array containing objects that map Name to the name of the file that is being uploaded."
-            },
-            "responses": {
-                "200": {
-                    "description": "This endpoint is for generating signed urls using transfer acceleration. Salesforce file record ids and signed urls were created for all provided file names. The file name provided in request maps to its corresponding signed url and salesforce file record id.",
+            "post": {
+                "tags": [
+                    "File Management"
+                ],
+                "summary": "Creates multiple or single salesforce file record ids and return signed urls.",
+                "description": "Providing single or multiple file names, a salesforce file record id and signed url will be created for each file name provided using transfer accelerator.\nThe response will be the original file name provided in the request mapped to an object containing that files signed url information and salesforce file record id.\nThe signed url is valid for 5 minutes and can be used to upload the file.\n",
+                "requestBody": {
+                    "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/FilesTAPostResponse"
+                                "$ref": "#/components/schemas/FilesTAPostRequest"
                             }
                         }
+                    },
+                    "description": "JSON array containing objects that map Name to the name of the file that is being uploaded."
+                },
+                "responses": {
+                    "200": {
+                        "description": "This endpoint is for generating signed urls using transfer acceleration. Salesforce file record ids and signed urls were created for all provided file names. The file name provided in request maps to its corresponding signed url and salesforce file record id.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/FilesTAPostResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/BadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/NotAuthorized"
                     }
-                },
-                "400": {
-                    "$ref": "#/components/responses/BadRequest"
-                },
-                "401": {
-                    "$ref": "#/components/responses/NotAuthorized"
                 }
             }
         },
@@ -682,8 +656,8 @@
                         "description": "Used to set number of files to return",
                         "required": false,
                         "schema": {
-                            "type": "int",
-                            "example": 2000.0
+                            "type": "integer",
+                            "example": 2000
                         }
                     },
                     {
@@ -757,13 +731,7 @@
                         "$ref": "#/components/responses/NotAuthorized"
                     },
                     "500": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ErrorMessageResponse"
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/ServerError"
                     }
                 }
             }
@@ -793,14 +761,7 @@
                         "$ref": "#/components/responses/BadRequest"
                     },
                     "500": {
-                        "description": "Error while processing request.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ErrorMessageResponse"
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/ServerError"
                     }
                 }
             }
@@ -850,14 +811,7 @@
                         }
                     },
                     "500": {
-                        "description": "Error communicating with salesforce. | Invalid salesforce file Id.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ErrorMessageResponse"
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/ServerError"
                     }
                 }
             }
@@ -907,14 +861,7 @@
                         }
                     },
                     "500": {
-                        "description": "Error communicating with salesforce. | Invalid salesforce file Id.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ErrorMessageResponse"
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/ServerError"
                     }
                 }
             }
@@ -1462,14 +1409,7 @@
                         }
                     },
                     "500": {
-                        "description": "An unknown error occurred. Please try again.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ErrorMessageResponse"
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/ServerError"
                     }
                 }
             },
@@ -1596,14 +1536,7 @@
                         "$ref": "#/components/responses/NotAuthorized"
                     },
                     "500": {
-                        "description": "Failed to upload file metadata in salesforce - returns a list of the salesforce file record ids that were attempted to be copied.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/CopyPostResponse"
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/ServerError"
                     }
                 }
             }
@@ -1789,14 +1722,7 @@
                         "$ref": "#/components/responses/NotAuthorized"
                     },
                     "500": {
-                        "description": "An unknown error occurred. Please try again.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ErrorMessageResponse"
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/ServerError"
                     }
                 }
             }
@@ -1848,14 +1774,7 @@
                         "$ref": "#/components/responses/NotAuthorized"
                     },
                     "500": {
-                        "description": "An unknown error occurred. Please try again.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ErrorMessageResponse"
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/ServerError"
                     }
                 }
             }
@@ -1895,14 +1814,7 @@
                         "$ref": "#/components/responses/NotAuthorized"
                     },
                     "500": {
-                        "description": "An unknown error occurred. Please try again.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ErrorMessageResponse"
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/ServerError"
                     }
                 }
             }
@@ -1942,14 +1854,7 @@
                         "$ref": "#/components/responses/NotAuthorized"
                     },
                     "500": {
-                        "description": "An unknown error occurred. Please try again.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ErrorMessageResponse"
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/ServerError"
                     }
                 }
             }
@@ -1989,14 +1894,7 @@
                         "$ref": "#/components/responses/NotAuthorized"
                     },
                     "500": {
-                        "description": "An unknown error occurred. Please try again.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ErrorMessageResponse"
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/ServerError"
                     }
                 }
             }
@@ -2036,14 +1934,7 @@
                         "$ref": "#/components/responses/NotAuthorized"
                     },
                     "500": {
-                        "description": "An unknown error occurred. Please try again.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ErrorMessageResponse"
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/ServerError"
                     }
                 }
             }
@@ -2083,14 +1974,7 @@
                         "$ref": "#/components/responses/NotAuthorized"
                     },
                     "500": {
-                        "description": "An unknown error occurred. Please try again.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ErrorMessageResponse"
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/ServerError"
                     }
                 }
             }
@@ -2181,14 +2065,7 @@
                         "$ref": "#/components/responses/NoSalesforcePermission"
                     },
                     "500": {
-                        "description": "An unexpected error occurred during processing.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ErrorMessageResponse"
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/ServerError"
                     }
                 }
             }
@@ -2274,14 +2151,7 @@
                         "$ref": "#/components/responses/NoSalesforcePermission"
                     },
                     "500": {
-                        "description": "An unexpected error occurred during processing.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ErrorMessageResponse"
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/ServerError"
                     }
                 }
             }
@@ -2762,6 +2632,16 @@
                         }
                     }
                 }
+            },
+            "ServerError": {
+                "description": "An unknown error occurred. Please try again.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/ErrorMessageResponse"
+                        }
+                    }
+                }
             }
         },
         "schemas": {
@@ -3068,11 +2948,13 @@
                     "properties": {
                         "type": "object",
                         "properties": {
+                            "type": "object",
                             "Templates": {
                                 "type": "array",
                                 "items": {
                                     "type": "object",
                                     "properties": {
+                                        "type": "object",
                                         "SourceId": {
                                             "type": "object",
                                             "properties": {
@@ -3106,139 +2988,18 @@
                                                 },
                                                 "properties": {
                                                     "type": "object",
-                                                    "example": {
-                                                        "SampleTagName": {
-                                                            "title": "input name",
-                                                            "type": "input type"
+                                                    "properties": {
+                                                        "type": "object",
+                                                        "example": {
+                                                            "type": "object"
                                                         }
                                                     }
-                                                }
-                                            }
-                                        },
-                                        "litify_docs__Origin_Merge_Template__c": {
-                                            "type": "object",
-                                            "properties": {
-                                                "const": {
-                                                    "type": "string",
-                                                    "example": "Id of litify_docs__Template__c record"
-                                                },
-                                                "description": {
-                                                    "type": "string",
-                                                    "example": "The Merge Template record from which the File Info record was created."
-                                                },
-                                                "title": {
-                                                    "type": "string",
-                                                    "example": "Origin Merge Template"
-                                                },
-                                                "type": {
-                                                    "type": "string",
-                                                    "example": "string"
-                                                }
-                                            }
-                                        },
-                                        "litify_docs__Related_To__c": {
-                                            "type": "object",
-                                            "properties": {
-                                                "description": {
-                                                    "type": "string",
-                                                    "example": "The Id of the record that the file is related to."
-                                                },
-                                                "title": {
-                                                    "type": "string",
-                                                    "example": "Related To"
-                                                },
-                                                "type": {
-                                                    "type": "string",
-                                                    "example": "string"
-                                                }
-                                            }
-                                        },
-                                        "litify_docs__Bulk_Merge__c": {
-                                            "type": "object",
-                                            "properties": {
-                                                "description": {
-                                                    "type": "string",
-                                                    "example": "The Bulk Merge Job from which this file originated."
-                                                },
-                                                "title": {
-                                                    "type": "string",
-                                                    "example": "Bulk Merge Job"
-                                                },
-                                                "type": {
-                                                    "type": "string",
-                                                    "example": "string"
-                                                }
-                                            }
-                                        },
-                                        "litify_docs__Folder_Path__c": {
-                                            "type": "object",
-                                            "properties": {
-                                                "description": {
-                                                    "type": "string",
-                                                    "example": "The location of the file within the folder structure of the record to which the file is related. Stored in JSON format."
-                                                },
-                                                "example": {
-                                                    "type": "string",
-                                                    "example": "[\r\n                                                            \"My Folder\"\r\n                                                        ]"
-                                                },
-                                                "title": {
-                                                    "type": "string",
-                                                    "example": "Parent Folder"
-                                                },
-                                                "type": {
-                                                    "type": "string",
-                                                    "example": "string"
-                                                }
-                                            }
-                                        },
-                                        "litify_docs__File_Type__c": {
-                                            "type": "object",
-                                            "properties": {
-                                                "const": {
-                                                    "type": "string",
-                                                    "example": "application/pdf"
-                                                },
-                                                "description": {
-                                                    "type": "string",
-                                                    "example": "The template file's MIME type."
-                                                },
-                                                "title": {
-                                                    "type": "string",
-                                                    "example": "Latest Version File Type"
-                                                },
-                                                "type": {
-                                                    "type": "string",
-                                                    "example": "string"
-                                                }
-                                            }
-                                        },
-                                        "Name": {
-                                            "type": "object",
-                                            "properties": {
-                                                "description": {
-                                                    "type": "string",
-                                                    "example": "Name of the the merged file"
-                                                },
-                                                "title": {
-                                                    "type": "string",
-                                                    "example": "File Name"
-                                                },
-                                                "type": {
-                                                    "type": "string",
-                                                    "example": "string"
                                                 }
                                             }
                                         }
                                     }
                                 }
                             }
-                        }
-                    },
-                    "required": {
-                        "type": "array",
-                        "items": {
-                            "type": "string",
-                            "example": "Templates"
                         }
                     }
                 }
@@ -3472,7 +3233,7 @@
                         "example": "1052217a-956b-433b-99eb-ab4ef82ceb5a"
                     },
                     "expirationTime": {
-                        "type": "int",
+                        "type": "integer",
                         "example": 1627581956
                     },
                     "status": {
@@ -3827,6 +3588,7 @@
                 "type": "object",
                 "properties": {
                     "name-of-file.png": {
+                        "type": "object",
                         "$ref": "#/components/schemas/SignedUrlObject"
                     }
                 }
@@ -3890,6 +3652,7 @@
                 "type": "object",
                 "properties": {
                     "name-of-file.png": {
+                        "type": "object",
                         "$ref": "#/components/schemas/SignedUrlObject"
                     }
                 }
@@ -3985,6 +3748,7 @@
                 "type": "object",
                 "properties": {
                     "name-of-file.png": {
+                        "type": "object",
                         "$ref": "#/components/schemas/MultipartSignedUrlObject"
                     }
                 }
@@ -3993,6 +3757,7 @@
                 "type": "object",
                 "properties": {
                     "name-of-file.png": {
+                        "type": "object",
                         "$ref": "#/components/schemas/MultipartSignedUrlObject"
                     }
                 }
@@ -4072,6 +3837,7 @@
                 "type": "object",
                 "properties": {
                     "name-of-file.png": {
+                        "type": "object",
                         "$ref": "#/components/schemas/MultipartSignedUrlObject"
                     }
                 }
@@ -4237,9 +4003,11 @@
                 "type": "object",
                 "properties": {
                     "Records": {
+                        "type": "object",
                         "$ref": "#/components/schemas/FileRecordObject"
                     },
                     "NextBatch": {
+                        "type": "object",
                         "$ref": "#/components/schemas/NextBatchObject"
                     }
                 }
@@ -4437,7 +4205,7 @@
                             "type": "object",
                             "properties": {
                                 "expirationTime": {
-                                    "type": "int",
+                                    "type": "integer",
                                     "example": 1628612697
                                 },
                                 "jobId": {
